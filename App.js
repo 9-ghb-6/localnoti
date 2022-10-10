@@ -1,120 +1,140 @@
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import React, { useState, useEffect, useRef } from 'react';
-import { Text, View, Button, Platform } from 'react-native';
+import { Text, View, Button, Platform, Alert } from 'react-native';
 
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-  }),
+    handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: false,
+        shouldSetBadge: false,
+    }),
 });
 
 export default function App() {
-  const [expoPushToken, setExpoPushToken] = useState('');
-  const [notification, setNotification] = useState(false);
-  const notificationListener = useRef();
-  const responseListener = useRef();
+    const [expoPushToken, setExpoPushToken] = useState('');
+    const [notification, setNotification] = useState(false);
+    const notificationListener = useRef();
+    const responseListener = useRef();
 
-  useEffect(() => {
-    registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
+    useEffect(() => {
+        registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
 
-    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-      setNotification(notification);
-    });
+        notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+            setNotification(notification);
+        });
 
-    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log(response);
-    });
+        responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+            console.log(response);
+        });
 
-    return () => {
-      Notifications.removeNotificationSubscription(notificationListener.current);
-      Notifications.removeNotificationSubscription(responseListener.current);
-    };
-  }, []);
+        return () => {
+            Notifications.removeNotificationSubscription(notificationListener.current);
+            Notifications.removeNotificationSubscription(responseListener.current);
+        };
+    }, []);
 
-  return (
-    <View
-      style={{
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'space-around',
-      }}>
-      <Text>Your expo push token: {expoPushToken}</Text>
-      <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <Text>Title: {notification && notification.request.content.title} </Text>
-        <Text>Body: {notification && notification.request.content.body}</Text>
-        <Text>Data: {notification && JSON.stringify(notification.request.content.data)}</Text>
-      </View>
-      <Button
-        title="Press to schedule a notification"
-        onPress={ () => {
-           logNextTriggerDate();
-        }}
-      />
-    </View>
-  );
+    return (
+        <View
+            style={{
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'space-around',
+            }}>
+            <Text>Your expo push token: {expoPushToken}</Text>
+            <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                <Text>Title: {notification && notification.request.content.title} </Text>
+                <Text>Body: {notification && notification.request.content.body}</Text>
+                <Text>Data: {notification && JSON.stringify(notification.request.content.data)}</Text>
+            </View>
+            <Button
+                title="알림설정하기"
+                onPress={ () => {
+                    logNextTriggerDate();
+                    Alert.alert('알림설정하기', '알림을 설정하시겠습니까?', [
+                        {
+                            text: 'Cancel',
+                            onPress: () => console.log('Cancel Pressed'),
+                            style: 'cancel',
+                        },
+                        { text: 'OK', onPress: () => console.log('OK Pressed') },
+                    ]);
+                }}
+            />
+            <Button
+                title="알림해제하기"
+                onPress={ () => {
+                    scheduleAndCancel();
+                    Alert.alert('알림해지하기', '알림을 해지하시겠습니까?', [
+                        {
+                            text: 'Cancel',
+                            onPress: () => console.log('Cancel Pressed'),
+                            style: 'cancel',
+                        },
+                        { text: 'OK', onPress: () => console.log('OK Pressed') },
+                    ]);
+                }}
+            />
+        </View>
+    );
 }
 
-function logNextTriggerDate() {
-  try {
-    const nextTriggerDate = Notifications.scheduleNotificationAsync({
-      content: {
-        title: "8시 56분 확인",
-        body: '8시 56분 확인',
-        data: { data: '확인' },
-      },
-      trigger: {
-        hour: 20, minute: 56, repeats: true
-      
-      }
+async function logNextTriggerDate() {
+
+        const nextTriggerDate = await Notifications.scheduleNotificationAsync({
+            content: {
+                title: `알림설정`,
+                body: '""알림이 시작되었습니다.',
+                data: { data: 'goes here' },
+            },
+
+            trigger: {
+                seconds:10,
+                repeats:true
+            }
+        });
+    await Notifications.scheduleNotificationAsync(nextTriggerDate);
+    }
+//=========================================================================================
+async function scheduleAndCancel() {
+    const identifier = await Notifications.scheduleNotificationAsync({
+        content: {
+            title: 'Hey!',
+        },
+        trigger: { seconds: 60, repeats: true },
     });
-    console.log(nextTriggerDate === null ? 'No next trigger date' : new Date(nextTriggerDate));
-  } catch (e) {
-    console.warn(`Couldn't have calculated next trigger date: ${e}`);
-  }
+    await Notifications.cancelScheduledNotificationAsync(identifier);
 }
 
-async function schedulePushNotification() {
-  await Notifications.scheduleNotificationAsync({
-    content: {
-      title: "You've got mail! 📬",
-      body: 'Here is the notification body',
-      data: { data: 'goes here' },
-    },
-    trigger: { seconds: 2 },
-  });
-}
-
+//=========================================================================================
 async function registerForPushNotificationsAsync() {
-  let token;
+    let token;
 
-  if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync('default', {
-      name: 'default',
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#FF231F7C',
-    });
-  }
-
-  if (Device.isDevice) {
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-    if (existingStatus !== 'granted') {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
+    if (Platform.OS === 'android') {
+        await Notifications.setNotificationChannelAsync('default', {
+            name: 'default',
+            importance: Notifications.AndroidImportance.MAX,
+            vibrationPattern: [0, 250, 250, 250],
+            lightColor: '#FF231F7C',
+        });
     }
-    if (finalStatus !== 'granted') {
-      alert('Failed to get push token for push notification!');
-      return;
-    }
-    token = (await Notifications.getExpoPushTokenAsync()).data;
-    console.log(token);
-  } else {
-    alert('Must use physical device for Push Notifications');
-  }
 
-  return token;
+    if (Device.isDevice) {
+        const { status: existingStatus } = await Notifications.getPermissionsAsync();
+        let finalStatus = existingStatus;
+        if (existingStatus !== 'granted') {
+            const { status } = await Notifications.requestPermissionsAsync();
+            finalStatus = status;
+        }
+        if (finalStatus !== 'granted') {
+            alert('Failed to get push token for push notification!');
+            return;
+        }
+        token = (await Notifications.getExpoPushTokenAsync()).data;
+        console.log(token);
+    } else {
+        alert('Must use physical device for Push Notifications');
+    }
+
+    return token;
 }
