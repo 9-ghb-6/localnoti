@@ -84,10 +84,11 @@ export default function App() {
 async function schedulePushNotification() {
     await Notifications.scheduleNotificationAsync({
         content: {
-            title: "11분짜리",
-            body: '10시 13분',
-            data: { data: '요호호호' },
+            title: "알림설정",
+            body: '알림설정을 완료하시겠습니까?',
+            data: { data: 'data' },
         },
+        //원하는 시간으로 변경
         trigger: {
             hour: 10,
             minute: 13,
@@ -98,6 +99,7 @@ async function schedulePushNotification() {
 
 //=========================================================================================
 //알림 취소 버튼..
+
 async function scheduleAndCancel() {
     const identifier = await Notifications.cancelAllScheduledNotificationsAsync({
         content: {
