@@ -84,7 +84,7 @@ export default function App() {
 async function schedulePushNotification() {
     await Notifications.scheduleNotificationAsync({
         content: {
-            title: "10일챌린지",
+            title: "Challenge's 10 Days",
             body: '알림설정이 완료되었습니다.',
             data: { data: 'data' },
         },
