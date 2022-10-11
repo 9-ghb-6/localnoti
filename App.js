@@ -84,14 +84,14 @@ export default function App() {
 async function schedulePushNotification() {
     await Notifications.scheduleNotificationAsync({
         content: {
-            title: "알림설정",
-            body: '알림설정을 완료하시겠습니까?',
+            title: "10일챌린지",
+            body: '알림설정이 완료되었습니다.',
             data: { data: 'data' },
         },
         //원하는 시간으로 변경
         trigger: {
-            hour: 10,
-            minute: 13,
+            hour: 11,
+            minute: 3,
             repeats: true
         },
     });
@@ -103,8 +103,13 @@ async function schedulePushNotification() {
 async function scheduleAndCancel() {
     const identifier = await Notifications.cancelAllScheduledNotificationsAsync({
         content: {
-            title: 'Hey!',
+            title: '알림이 취소되었습니다.',
+            body: "알림이 취소되었습니다.",
+            data: { data: 'data' },
         },
+        trigger: {
+            second: 1,
+        }
     });
     await Notifications.cancelAllScheduledNotificationsAsync(identifier);
 }
