@@ -48,20 +48,6 @@ export default function App() {
                 <Text>Data: {notification && JSON.stringify(notification.request.content.data)}</Text>
             </View>
             <Button
-                title="알림 매 시간 설정하기"
-                onPress={ () => {
-                    logNextTriggerDate();
-                    Alert.alert('알림설정하기', '알림을 설정하시겠습니까?', [
-                        {
-                            text: 'Cancel',
-                            onPress: () => console.log('Cancel Pressed'),
-                            style: 'cancel',
-                        },
-                        { text: 'OK', onPress: () => console.log('OK Pressed') },
-                    ]);
-                }}
-            />
-            <Button
                 title="알림해제하기"
                 onPress={ () => {
                     scheduleAndCancel();
@@ -94,34 +80,19 @@ export default function App() {
 }
 
 //=========================================================================================
-//알림 매 시간 설정
-async function logNextTriggerDate() {
-
-        const nextTriggerDate = await Notifications.scheduleNotificationAsync({
-            content: {
-                title: `알림설정`,
-                body: '""알림이 시작되었습니다.',
-                data: { data: 'goes here' },
-            },
-
-            trigger: {
-                second:10,
-                repeats:true
-            }
-        });
-    await Notifications.scheduleNotificationAsync(nextTriggerDate);
-}
-
-//=========================================================================================
 //알람 설정
 async function schedulePushNotification() {
     await Notifications.scheduleNotificationAsync({
         content: {
-            title: "You've got mail! 📬",
-            body: 'Here is the notification body',
-            data: { data: 'goes here' },
+            title: "11분짜리",
+            body: '10시 13분',
+            data: { data: '요호호호' },
         },
-        trigger: { seconds: 10, repeats: true },
+        trigger: {
+            hour: 10,
+            minute: 13,
+            repeats: true
+        },
     });
 }
 
