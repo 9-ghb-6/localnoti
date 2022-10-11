@@ -49,7 +49,7 @@ export default function App() {
             </View>
             <Button
                 title="알림해제하기"
-                onPress={ () => {
+                onPress={() => {
                     scheduleAndCancel();
                     Alert.alert('알림해지하기', '알림을 해지하시겠습니까?', [
                         {
@@ -63,7 +63,7 @@ export default function App() {
             />
             <Button
                 title="알림설정하기"
-                onPress={ () => {
+                onPress={() => {
                     schedulePushNotification();
                     Alert.alert('알림설정하기', '알림을 설정하시겠습니까?', [
                         {
