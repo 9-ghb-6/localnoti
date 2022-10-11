@@ -1,7 +1,7 @@
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import React, { useState, useEffect, useRef } from 'react';
-import { Text, View, Button, Platform } from 'react-native';
+import { Text, View, Button, Platform, TextInput } from 'react-native';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -62,6 +62,7 @@ export default function App() {
     </View>
   );
 }
+
 //알림설정
 function logNextTriggerDate() {
   try {

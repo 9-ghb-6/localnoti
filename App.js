@@ -48,7 +48,7 @@ export default function App() {
                 <Text>Data: {notification && JSON.stringify(notification.request.content.data)}</Text>
             </View>
             <Button
-                title="알림설정하기"
+                title="알림 매 시간 설정하기"
                 onPress={ () => {
                     logNextTriggerDate();
                     Alert.alert('알림설정하기', '알림을 설정하시겠습니까?', [
@@ -75,10 +75,26 @@ export default function App() {
                     ]);
                 }}
             />
+            <Button
+                title="알림설정하기"
+                onPress={ () => {
+                    schedulePushNotification();
+                    Alert.alert('알림설정하기', '알림을 설정하시겠습니까?', [
+                        {
+                            text: 'Cancel',
+                            onPress: () => console.log('Cancel Pressed'),
+                            style: 'cancel',
+                        },
+                        { text: 'OK', onPress: () => console.log('OK Pressed') },
+                    ]);
+                }}
+            />
         </View>
     );
 }
 
+//=========================================================================================
+//알림 매 시간 설정
 async function logNextTriggerDate() {
 
         const nextTriggerDate = await Notifications.scheduleNotificationAsync({
@@ -89,21 +105,35 @@ async function logNextTriggerDate() {
             },
 
             trigger: {
-                seconds:10,
+                second:10,
                 repeats:true
             }
         });
     await Notifications.scheduleNotificationAsync(nextTriggerDate);
-    }
+}
+
 //=========================================================================================
+//알람 설정
+async function schedulePushNotification() {
+    await Notifications.scheduleNotificationAsync({
+        content: {
+            title: "You've got mail! 📬",
+            body: 'Here is the notification body',
+            data: { data: 'goes here' },
+        },
+        trigger: { seconds: 10, repeats: true },
+    });
+}
+
+//=========================================================================================
+//알림 취소 버튼..
 async function scheduleAndCancel() {
-    const identifier = await Notifications.scheduleNotificationAsync({
+    const identifier = await Notifications.cancelAllScheduledNotificationsAsync({
         content: {
             title: 'Hey!',
         },
-        trigger: { seconds: 60, repeats: true },
     });
-    await Notifications.cancelScheduledNotificationAsync(identifier);
+    await Notifications.cancelAllScheduledNotificationsAsync(identifier);
 }
 
 //=========================================================================================
